@@ -8,9 +8,6 @@ const bookingSchema = new mongoose.Schema({
   date: Date,
   amount: Number,
   paid: { type: Boolean, default: false },
-  checkoutRequestId: String, // store STK Push request ID
 });
 
-const Booking = mongoose.model("Booking", bookingSchema);
-
-export default Booking;
+export default mongoose.model("Booking", bookingSchema);

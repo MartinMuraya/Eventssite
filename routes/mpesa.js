@@ -1,209 +1,88 @@
-// import express from "express";
-// import fetch from "node-fetch";
-
-// const router = express.Router();
-
-// // Safaricom Daraja credentials
-
-// const SHORTCODE = process.env.MPESA_SHORTCODE;
-// const LNM_PASSKEY = process.env.MPESA_PASSKEY;
-// const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY;
-// const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET;
-// const CALLBACK_URL = process.env.MPESA_CALLBACK_URL;
-
-// // Get OAuth token
-
-// async function getToken() {
-//   const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString("base64");
-//   const response = await fetch("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", {
-//     headers: { Authorization: `Basic ${auth}` }
-//   });
-//   const data = await response.json();
-//   return data.access_token;
-// }
-
-// // Initiate STK Push
-
-// router.post("/stkpush", async (req, res) => {
-//   try {
-//     const { phone, amount } = req.body;
-//     const token = await getToken();
-//     const timestamp = new Date().toISOString().replace(/[^0-9]/g, "").slice(0, 14);
-//     const password = Buffer.from(`${SHORTCODE}${LNM_PASSKEY}${timestamp}`).toString("base64");
-
-//     const body = {
-//       BusinessShortCode: SHORTCODE,
-//       Password: password,
-//       Timestamp: timestamp,
-//       TransactionType: "CustomerPayBillOnline",
-//       Amount: amount,
-//       PartyA: phone,
-//       PartyB: SHORTCODE,
-//       PhoneNumber: phone,
-//       CallBackURL: CALLBACK_URL,
-//       AccountReference: "EventBooking",
-//       TransactionDesc: "Event Booking Payment",
-//     };
-
-//     const response = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
-//       method: "POST",
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//         "Content-Type": "application/json"
-//       },
-//       body: JSON.stringify(body)
-//     });
-
-//     const data = await response.json();
-//     res.json(data);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "STK Push failed" });
-//   }
-// });
-
-// export default router;
-// import express from "express";
-// import fetch from "node-fetch";
-
-// export default (Booking) => {
-//   const router = express.Router();
-
-//   // Generate access token
-//   const getAccessToken = async () => {
-//     const consumerKey = process.env.MPESA_CONSUMER_KEY;
-//     const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
-//     const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
-
-//     const response = await fetch(
-//       "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
-//       { method: "GET", headers: { Authorization: `Basic ${auth}` } }
-//     );
-//     const data = await response.json();
-//     return data.access_token;
-//   };
-
-//   // STK Push endpoint
-//   router.post("/stkpush", async (req, res) => {
-//     try {
-//       const { phone, amount, bookingId } = req.body;
-//       const token = await getAccessToken();
-//       const timestamp = new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
-
-//       const shortcode = process.env.MPESA_SHORTCODE;
-//       const passkey = process.env.MPESA_PASSKEY;
-//       const password = Buffer.from(shortcode + passkey + timestamp).toString("base64");
-
-//       const stkResponse = await fetch(
-//         "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-//         {
-//           method: "POST",
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//             "Content-Type": "application/json",
-//           },
-//           body: JSON.stringify({
-//             BusinessShortCode: shortcode,
-//             Password: password,
-//             Timestamp: timestamp,
-//             TransactionType: "CustomerPayBillOnline",
-//             Amount: amount,
-//             PartyA: phone,
-//             PartyB: shortcode,
-//             PhoneNumber: phone,
-//             CallBackURL: "https://yourdomain.com/api/mpesa/callback",
-//             AccountReference: "DreamEvents",
-//             TransactionDesc: "Event Booking Payment",
-//           }),
-//         }
-//       );
-
-//       const data = await stkResponse.json();
-
-//       // Optional: mark booking as paid (after callback)
-//       // await Booking.findByIdAndUpdate(bookingId, { paid: true });
-
-//       res.json(data);
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ error: "STK Push failed" });
-//     }
-//   });
-
-//   return router;
-// };
-
 import express from "express";
-import fetch from "node-fetch"; //  node-fetch
+import Booking from "../models/Booking.js"; // Booking model
 import dotenv from "dotenv";
-import Booking from "../models/Booking.js";
+import fetch from "node-fetch";
 
 dotenv.config();
 const router = express.Router();
 
 // Generate access token
+
 const getAccessToken = async () => {
-  const consumerKey = process.env.MPESA_CONSUMER_KEY;
-  const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
-  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
-
-  const response = await fetch(
-    "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
-    {
-      method: "GET",
-      headers: { Authorization: `Basic ${auth}` },
-    }
-  );
-
+  const auth = Buffer.from(`${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`).toString("base64");
+  const response = await fetch("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", {
+    method: "GET",
+    headers: { Authorization: `Basic ${auth}` },
+  });
   const data = await response.json();
   return data.access_token;
 };
 
-// STK Push endpoint
+// STK Push
 router.post("/stkpush", async (req, res) => {
   try {
-    const { bookingId, phone, amount } = req.body;
-
-    // Find the booking
-    const booking = await Booking.findById(bookingId);
-    if (!booking) return res.status(404).json({ error: "Booking not found" });
-
+    const { phone, amount, bookingId } = req.body;
     const token = await getAccessToken();
     const timestamp = new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
 
-    const shortcode = process.env.MPESA_SHORTCODE;
-    const passkey = process.env.MPESA_PASSKEY;
-    const password = Buffer.from(shortcode + passkey + timestamp).toString("base64");
+    const password = Buffer.from(process.env.MPESA_SHORTCODE + process.env.MPESA_PASSKEY + timestamp).toString("base64");
 
-    const stkResponse = await fetch(
-      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          BusinessShortCode: shortcode,
-          Password: password,
-          Timestamp: timestamp,
-          TransactionType: "CustomerPayBillOnline",
-          Amount: amount,
-          PartyA: phone, // Customer phone
-          PartyB: shortcode,
-          PhoneNumber: phone,
-          CallBackURL: "https://yourdomain.com/api/mpesa/callback", //  callback endpoint
-          AccountReference: booking.eventType,
-          TransactionDesc: "Event Booking Payment",
-        }),
-      }
-    );
+    const stkResponse = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        BusinessShortCode: process.env.MPESA_SHORTCODE,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: amount,
+        PartyA: phone,
+        PartyB: process.env.MPESA_SHORTCODE,
+        PhoneNumber: phone,
+        CallBackURL: "https://eventssite-j3vw.onrender.com/api/mpesa/callback", // <--live endpoint
+        AccountReference: "DreamEvents",
+        TransactionDesc: "Event Booking Payment",
+      }),
+    });
 
     const data = await stkResponse.json();
-    res.json({ success: true, mpesaResponse: data });
+    // Return response to frontend
+    res.json({ success: true, data });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "STK Push failed" });
+  }
+});
+
+// Callback URL (called by Safaricom after payment)
+router.post("/callback", async (req, res) => {
+  try {
+    const callbackData = req.body;
+    console.log("MPesa callback received:", callbackData);
+
+    // Extract the relevant info
+    const resultCode = callbackData.Body.stkCallback.ResultCode;
+    const checkoutRequestID = callbackData.Body.stkCallback.CheckoutRequestID;
+
+    if (resultCode === 0) {
+      // Successful payment
+      const amount = callbackData.Body.stkCallback.CallbackMetadata.Item.find(i => i.Name === "Amount").Value;
+      const phone = callbackData.Body.stkCallback.CallbackMetadata.Item.find(i => i.Name === "PhoneNumber").Value;
+
+      // Update booking based on phone number & amount
+      await Booking.findOneAndUpdate(
+        { phone, amount, paid: false },
+        { $set: { paid: true } }
+      );
+    }
+
+    res.status(200).json({ message: "Callback received" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to process callback" });
   }
 });
 
