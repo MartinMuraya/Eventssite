@@ -15,7 +15,7 @@ function Contact() {
     e.preventDefault();
     setStatus("");
     try {
-      await axios.post("https://your-backend.onrender.com/api/contact", formData);
+      await axios.post("https://portfolio-backend-7ww5.onrender.com/api/contact", formData);
       setStatus("✅ Message sent successfully!");
       setFormData({ name: "", email: "", message: "" }); // Clear form
     } catch (err) {
