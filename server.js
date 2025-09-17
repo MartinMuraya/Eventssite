@@ -80,6 +80,7 @@ import dotenv from "dotenv";
 import mpesaRoutes from "./routes/mpesa.js";
 import Event from "./models/Event.js";
 import Booking from "./models/Booking.js";
+import contactRoutes from "./routes/contact.js";
 
 dotenv.config();
 const app = express();
@@ -124,6 +125,8 @@ seedEvents();
 
 // --- Routes ---
 app.use("/api/mpesa", mpesaRoutes);  //Mpesa routes
+app.use("/api/contact", contactRoutes); 
+
 // Base route
 app.get("/", (req, res) => res.send("API is running"));
 
