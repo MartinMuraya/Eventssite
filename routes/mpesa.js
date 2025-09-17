@@ -19,37 +19,42 @@ const getAccessToken = async () => {
 };
 
 // STK Push
+
 router.post("/stkpush", async (req, res) => {
   try {
-    const { phone, amount, bookingId } = req.body;
+    const { phone, amount, accountReference, transactionDesc } = req.body;
     const token = await getAccessToken();
     const timestamp = new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
 
-    const password = Buffer.from(process.env.MPESA_SHORTCODE + process.env.MPESA_PASSKEY + timestamp).toString("base64");
+    const password = Buffer.from(
+      process.env.MPESA_SHORTCODE + process.env.MPESA_PASSKEY + timestamp
+    ).toString("base64");
 
-    const stkResponse = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        BusinessShortCode: process.env.MPESA_SHORTCODE,
-        Password: password,
-        Timestamp: timestamp,
-        TransactionType: "CustomerPayBillOnline",
-        Amount: amount,
-        PartyA: phone,
-        PartyB: process.env.MPESA_SHORTCODE,
-        PhoneNumber: phone,
-        CallBackURL: "https://eventssite-j3vw.onrender.com/api/mpesa/callback", // <--live endpoint
-        AccountReference: "DreamEvents",
-        TransactionDesc: "Event Booking Payment",
-      }),
-    });
+    const stkResponse = await fetch(
+      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          BusinessShortCode: process.env.MPESA_SHORTCODE,
+          Password: password,
+          Timestamp: timestamp,
+          TransactionType: "CustomerPayBillOnline",
+          Amount: amount,
+          PartyA: phone,
+          PartyB: process.env.MPESA_SHORTCODE,
+          PhoneNumber: phone,
+          CallBackURL: "https://eventssite-j3vw.onrender.com/api/mpesa/callback",
+          AccountReference: accountReference || "DreamEvents",
+          TransactionDesc: transactionDesc || "Event Booking Payment",
+        }),
+      }
+    );
 
     const data = await stkResponse.json();
-    // Return response to frontend
     res.json({ success: true, data });
   } catch (err) {
     console.error(err);
@@ -63,7 +68,7 @@ router.post("/callback", async (req, res) => {
     const callbackData = req.body;
     console.log("MPesa callback received:", callbackData);
 
-    // Extract the relevant info
+    // Extract relevant info
     const resultCode = callbackData.Body.stkCallback.ResultCode;
     const checkoutRequestID = callbackData.Body.stkCallback.CheckoutRequestID;
 
