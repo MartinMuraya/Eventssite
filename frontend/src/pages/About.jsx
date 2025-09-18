@@ -17,8 +17,8 @@ function About() {
       <section className="max-w-6xl mx-auto p-8 text-center">
         <h2 className="text-3xl font-semibold mb-4">Our Story</h2>
         <p className="text-gray-700 mb-6">
-          We create unforgettable wedding experiences that celebrate love, joy, and family. 
-          Our team works tirelessly to bring your dream wedding to life with attention to every detail.
+          We create unforgettable wedding and events experiences that celebrate love, joy, and family. 
+          Our team works tirelessly to bring your dream wedding or event to life with attention to every detail.
         </p>
       </section>
 
@@ -28,13 +28,13 @@ function About() {
           <div className="flex flex-col justify-center">
             <h3 className="text-2xl font-semibold mb-2">Our Mission</h3>
             <p className="text-gray-700">
-              To craft unique, magical wedding experiences that reflect your love story and create lasting memories.
+              To craft unique, magical wedding and any event experiences that reflect your love story and create lasting memories.
             </p>
           </div>
           <div className="flex flex-col justify-center">
             <h3 className="text-2xl font-semibold mb-2">Our Vision</h3>
             <p className="text-gray-700">
-              To be the most trusted and creative wedding planning team, delivering excellence in every celebration.
+              To be the most trusted and creative event's planning team, delivering excellence in every celebration.
             </p>
           </div>
         </div>
@@ -47,7 +47,7 @@ function About() {
           <div className="bg-white p-6 rounded shadow hover:shadow-lg transition">
             <FaHeart className="text-pink-500 text-4xl mb-4 mx-auto" />
             <h4 className="text-xl font-semibold mb-2 text-center">Passionate Team</h4>
-            <p className="text-gray-700 text-center">Our team loves what we do and it shows in every wedding we organize.</p>
+            <p className="text-gray-700 text-center">Our team loves what we do and it shows in every event we organize.</p>
           </div>
           <div className="bg-white p-6 rounded shadow hover:shadow-lg transition">
             <FaStar className="text-pink-500 text-4xl mb-4 mx-auto" />

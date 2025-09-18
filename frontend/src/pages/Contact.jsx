@@ -8,7 +8,7 @@ function Contact() {
   const [status, setStatus] = useState(""); // Success/Error message
   const [loading, setLoading] = useState(false); // Loading state
 
-  const API_URL = import.meta.env.VITE_API_URL; //dynamic backend URL
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,11 +20,17 @@ function Contact() {
     setLoading(true);
 
     try {
-      await axios.post(`${API_URL}/api/contact`, formData);
-      setStatus("✅ Message sent successfully!");
-      setFormData({ name: "", email: "", message: "" }); // Clear form
+      // Send POST request to deployed backend
+      const res = await axios.post(`${API_URL}/api/contact`, formData);
+
+      if (res.data.success) {
+        setStatus("✅ Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" }); // Clear form
+      } else {
+        setStatus("❌ Failed to send message. Please try again.");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Contact form error:", err);
       setStatus("❌ Failed to send message. Please try again.");
     } finally {
       setLoading(false);
@@ -68,11 +74,7 @@ function Contact() {
         <h2 className="text-2xl font-bold text-pink-700 mb-6 text-center">Send a Message</h2>
 
         {status && (
-          <p
-            className={`text-center mb-4 ${
-              status.startsWith("✅") ? "text-green-600" : "text-red-600"
-            }`}
-          >
+          <p className={`text-center mb-4 ${status.startsWith("✅") ? "text-green-600" : "text-red-600"}`}>
             {status}
           </p>
         )}

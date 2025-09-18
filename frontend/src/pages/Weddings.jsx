@@ -3,8 +3,8 @@ import React from 'react';
 function Weddings() {
   const events = [
     { title: "Abby & Martin's Wedding", date: "Oct 12, 2025", location: "Diani", img: "/images/img3.jpg" },
-    { title: "Sophia & Mark's Wedding", date: "Nov 5, 2025", location: "Maasai Mara", img: "/images/img11.jpg" },
-    { title: "Rahab & Ally's Wedding", date: "Dec 20, 2025", location: "Watamu Island", img: "/images/img11.jpg" }
+    { title: "Sophia & Mark's Wedding", date: "Nov 5, 2025", location: "Maasai Mara", img: "/images/img17.jpg" },
+    { title: "Rahab & Ally's Wedding", date: "Dec 20, 2025", location: "Watamu Island", img: "/images/img16.webp" }
   ];
 
   return (
