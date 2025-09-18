@@ -5,8 +5,6 @@ import dotenv from "dotenv";
 dotenv.config();
 const router = express.Router();
 
-// @route   POST /api/contact
-// @desc    Send contact form email
 router.post("/", async (req, res) => {
   const { name, email, message } = req.body;
 

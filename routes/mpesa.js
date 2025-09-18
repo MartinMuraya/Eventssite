@@ -47,7 +47,7 @@ router.post("/stkpush", async (req, res) => {
           PartyA: phone,
           PartyB: process.env.MPESA_SHORTCODE,
           PhoneNumber: phone,
-          CallBackURL: "https://eventssite-j3vw.onrender.com/api/mpesa/callback",
+          CallBackURL: "https://eventssite-1.onrender.com/api/mpesa/callback",
           AccountReference: accountReference || "DreamEvents",
           TransactionDesc: transactionDesc || "Event Booking Payment",
         }),
