@@ -1,5 +1,6 @@
 import React from "react";
 import { FaHeart, FaStar, FaUsers } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 function About() {
   return (
@@ -65,12 +66,12 @@ function About() {
       {/* Call to Action */}
       <section className="text-center py-12">
         <h3 className="text-2xl font-semibold mb-4">Ready to plan your dream wedding/event?</h3>
-        <a
-          href="/booking"
+        <Link
+          to="/booking"
           className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded shadow transition"
-        >
-          Book Your Event
-        </a>
+              >
+            Book Your Event
+        </Link>
       </section>
     </div>
   );
